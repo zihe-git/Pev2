@@ -122,6 +122,7 @@ onBeforeMount(() => {
   }
   let planJson: IPlanContent
   try {
+    // 入口
     planJson = planService.fromSource(props.planSource) as IPlanContent
     parsed.value = true
     setActiveTab("plan")
