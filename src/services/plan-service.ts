@@ -606,6 +606,39 @@ export class PlanService {
       )
       const nodeMatches = nodeRegex.exec(line)
 
+      // Match Gather Motion node info
+      const gatherNodeRegex = new RegExp(
+        prefixRegex +
+          typeRegex +
+          "([^\\r\\n\\t\\f\\v\\:\\(]*?)\\s*" +
+          "(\\d+):(\\d+)" +
+          "\\s+" +
+          "\\(([^\\)]+)\\)" +
+          " \\s+" +
+          nonCapturingGroupOpen +
+          (nonCapturingGroupOpen +
+            estimationRegex +
+            "\\s+" +
+            openParenthesisRegex +
+            actualRegex +
+            closeParenthesisRegex +
+            nonCapturingGroupClose) +
+          "|" +
+          nonCapturingGroupOpen +
+          estimationRegex +
+          nonCapturingGroupClose +
+          "|" +
+          nonCapturingGroupOpen +
+          openParenthesisRegex +
+          actualRegex +
+          closeParenthesisRegex +
+          nonCapturingGroupClose +
+          nonCapturingGroupClose +
+          "\\s*$",
+        "gm"
+      )
+      const gatherNodeMatches = gatherNodeRegex.exec(line)
+
       // tslint:disable-next-line:max-line-length
       const subRegex =
         /^(\s*)((?:Sub|Init)Plan)\s*(?:\d+\s*)?\s*(?:\(returns.*\)\s*)?$/gm
@@ -711,6 +744,79 @@ export class PlanService {
           newNode[NodeProp.ACTUAL_ROWS] = 0
           newNode[NodeProp.ACTUAL_TOTAL_TIME] = 0
         }
+        const element = {
+          node: newNode,
+          subelementType: "subnode",
+        }
+
+        if (0 === elementsAtDepth.length) {
+          elementsAtDepth.push([depth, element])
+          root.Plan = newNode
+          return
+        }
+
+        // Remove elements from elementsAtDepth for deeper levels
+        _.remove(elementsAtDepth, (e) => {
+          return e[0] >= depth
+        })
+
+        // ! is for non-null assertion
+        // Prevents the "Object is possibly 'undefined'" linting error
+        const previousElement = _.last(elementsAtDepth)?.[1] as NodeElement
+
+        if (!previousElement) {
+          return
+        }
+
+        elementsAtDepth.push([depth, element])
+
+        if (!previousElement.node[NodeProp.PLANS]) {
+          previousElement.node[NodeProp.PLANS] = []
+        }
+        if (previousElement.subelementType === "initplan") {
+          newNode[NodeProp.PARENT_RELATIONSHIP] = "InitPlan"
+          newNode[NodeProp.SUBPLAN_NAME] = previousElement.name as string
+        } else if (previousElement.subelementType === "subplan") {
+          newNode[NodeProp.PARENT_RELATIONSHIP] = "SubPlan"
+          newNode[NodeProp.SUBPLAN_NAME] = previousElement.name as string
+        }
+        previousElement.node.Plans?.push(newNode)
+      } else if (gatherNodeMatches && !cteMatches && !subMatches) {
+        //const prefix = nodeMatches[1]
+        //const neverExecuted = gatherNodeMatches[13]
+        const newNode: Node = new Node(gatherNodeMatches[3])
+        if (gatherNodeMatches[4] && gatherNodeMatches[5]) {
+          newNode[NodeProp.DATA_SEGMENTS] = parseFloat(gatherNodeMatches[4])
+          newNode[NodeProp.TARGET_DATA_NODE] = parseFloat(gatherNodeMatches[5])
+        }
+        if (gatherNodeMatches[6]) {
+          newNode[NodeProp.SLICE_SEGMENTS] = gatherNodeMatches[6]
+        }
+        if (gatherNodeMatches[7] && gatherNodeMatches[8]) {
+          newNode[NodeProp.STARTUP_COST] = parseFloat(gatherNodeMatches[7])
+          newNode[NodeProp.TOTAL_COST] = parseFloat(gatherNodeMatches[8])
+          newNode[NodeProp.PLAN_ROWS] = parseInt(gatherNodeMatches[9], 0)
+          newNode[NodeProp.PLAN_WIDTH] = parseInt(gatherNodeMatches[10], 0)
+        }
+        if (gatherNodeMatches[11] && gatherNodeMatches[12]) {
+          newNode[NodeProp.ACTUAL_STARTUP_TIME] = parseFloat(
+            gatherNodeMatches[11]
+          )
+          newNode[NodeProp.ACTUAL_TOTAL_TIME] = parseFloat(
+            gatherNodeMatches[12]
+          )
+        }
+
+        if (gatherNodeMatches[13] && gatherNodeMatches[14]) {
+          newNode[NodeProp.ACTUAL_ROWS] = parseInt(gatherNodeMatches[13], 0)
+          newNode[NodeProp.ACTUAL_LOOPS] = parseInt(gatherNodeMatches[14], 0)
+        }
+
+        /*if (neverExecuted) {
+          newNode[NodeProp.ACTUAL_LOOPS] = 0
+          newNode[NodeProp.ACTUAL_ROWS] = 0
+          newNode[NodeProp.ACTUAL_TOTAL_TIME] = 0
+        }*/
         const element = {
           node: newNode,
           subelementType: "subnode",
