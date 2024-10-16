@@ -484,7 +484,7 @@ export class PlanService {
         out[out.length - 1] += line
       } else if (
         line.match(
-          /^(?:Total\s+runtime|Planning\s+time|Execution\s+time|Time|Filter|Output|JIT)/i
+          /^(?:Total\s+runtime|Planning\s+time|Memory\s+used|\s+\(slice\d+\)|Optimizer|Execution\s+time|Time|Filter|Output|JIT)/i
         )
       ) {
         out.push(line)
@@ -607,6 +607,36 @@ export class PlanService {
       const nodeMatches = nodeRegex.exec(line)
 
       // Match Gather Motion node info
+      /*
+       * Groups
+       * 1: prefix
+       * 3: type(Gather/Redistribute motion)
+       * 4: data_segments
+       * 5: target_data_node
+       * 6: slice_segments
+       * 7: estimated_startup_cost
+       * 8: estimated_total_cost
+       * 9: estimated_rows
+       * 10: estimated_row_width
+       * 11: actual_time_first
+       * 12: actual_time_last
+       * 13: actual_rows
+       * 14: actual_loops
+       * 15: actual_rows_
+       * 16: actual_loops_
+       * 17: never_executed
+       * 18: data_segments
+       * 19: target_data_node
+       * 20: slice_segments
+       * 21: estimated_startup_cost
+       * 22: estimated_total_cost
+       * 23: estimated_rows
+       * 24: estimated_row_width
+       * 25: actual_time_first
+       * 26: actual_time_last
+       * 27: actual_rows
+       * 28: actual_loops
+       */
       const gatherNodeRegex = new RegExp(
         prefixRegex +
           typeRegex +
@@ -686,6 +716,9 @@ export class PlanService {
 
       const extraRegex = /^(\s*)(\S.*\S)\s*$/g
       const extraMatches = extraRegex.exec(line)
+
+      //const sliceRegex = /\((slice\d+)\)\s+(?:Executor\s+memory:\s+)?([^,\.]+)(?:,\s+([^,\.]+))?(?:\.\s+Work_mem:\s+([^,\.]+))?/
+      //const sliceMathches = sliceRegex.exec(line)
 
       if (emptyLineMatches || headerMatches) {
         return
@@ -783,7 +816,10 @@ export class PlanService {
         previousElement.node.Plans?.push(newNode)
       } else if (gatherNodeMatches && !cteMatches && !subMatches) {
         //const prefix = nodeMatches[1]
-        //const neverExecuted = gatherNodeMatches[13]
+        const neverExecuted = gatherNodeMatches[17]
+        const sliceSegments = gatherNodeMatches[6]
+          .split(/\s*;\s*/)
+          .filter((x) => x)
         const newNode: Node = new Node(gatherNodeMatches[3])
         if (gatherNodeMatches[4] && gatherNodeMatches[5]) {
           newNode[NodeProp.DATA_SEGMENTS] = parseFloat(gatherNodeMatches[4])
@@ -811,12 +847,14 @@ export class PlanService {
           newNode[NodeProp.ACTUAL_ROWS] = parseInt(gatherNodeMatches[13], 0)
           newNode[NodeProp.ACTUAL_LOOPS] = parseInt(gatherNodeMatches[14], 0)
         }
-
-        /*if (neverExecuted) {
+        if (sliceSegments[0]) {
+          newNode[NodeProp.SLICE] = sliceSegments[0]
+        }
+        if (neverExecuted) {
           newNode[NodeProp.ACTUAL_LOOPS] = 0
           newNode[NodeProp.ACTUAL_ROWS] = 0
           newNode[NodeProp.ACTUAL_TOTAL_TIME] = 0
-        }*/
+        }
         const element = {
           node: newNode,
           subelementType: "subnode",
