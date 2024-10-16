@@ -28,6 +28,7 @@ export interface IPlanContent {
   maxIo?: number
   maxEstimateFactor?: number
   Triggers?: ITrigger[]
+  Slice?: Slice[]
   JIT?: JIT
   "Query Text"?: string
   [k: string]:
@@ -36,6 +37,7 @@ export interface IPlanContent {
     | string
     | IBlocksStats
     | ITrigger[]
+    | Slice[]
     | JIT
     | undefined
 }
@@ -45,6 +47,18 @@ export interface ITrigger {
   Relation?: string
   Time: number
   Calls: string
+}
+
+export interface Slice {
+  "Slice Num": string
+  ExecutorMemory?: ExecutorMemory
+  WorkMemory?: number
+}
+
+export interface ExecutorMemory {
+  "average memory"?: number
+  "Number of worker threads"?: number
+  "Maximum memory"?: number
 }
 
 export interface IPlanStats {

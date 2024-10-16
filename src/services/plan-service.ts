@@ -606,7 +606,7 @@ export class PlanService {
       )
       const nodeMatches = nodeRegex.exec(line)
 
-      // Match Gather Motion node info
+      // Match Gather Motion and Redistribute Motion node info
       /*
        * Groups
        * 1: prefix
@@ -717,8 +717,17 @@ export class PlanService {
       const extraRegex = /^(\s*)(\S.*\S)\s*$/g
       const extraMatches = extraRegex.exec(line)
 
-      //const sliceRegex = /\((slice\d+)\)\s+(?:Executor\s+memory:\s+)?([^,\.]+)(?:,\s+([^,\.]+))?(?:\.\s+Work_mem:\s+([^,\.]+))?/
-      //const sliceMathches = sliceRegex.exec(line)
+      /*
+       * Groups
+       * 1: slice num
+       * 2: average memory
+       * 3: number of worker threads
+       * 4: maximum memory
+       * 5: worke memory
+       */
+      const sliceRegex =
+        /\(slice(\d+)\)\s+(?:Executor\s+memory:\s*)?(?:(\d+)?K\s+bytes)?(?:\s+avg\s+x\s+(\d+)?\s+workers)?(?:,\s*(\d+)?K\s+bytes\s+max\s+\(seg\d+\))?(?:\.\s+Work_mem:\s*(\d+)?K\s+bytes\s+max\.)?/
+      const sliceMathches = sliceRegex.exec(line)
 
       if (emptyLineMatches || headerMatches) {
         return
@@ -985,7 +994,19 @@ export class PlanService {
             elementsAtDepth.push([depth, element])
           }
         }
-      } else if (extraMatches) {
+      } else if (sliceMathches) {
+        _.remove(elementsAtDepth, (e) => e[0] >= depth || depth == 1)
+        root.Slice = root.Slice || []
+        root.Slice.push({
+          "Slice Num": sliceMathches[1],
+          ExecutorMemory: {
+            "average memory": parseInt(sliceMathches[2]),
+            "Number of worker threads": parseInt(sliceMathches[3]),
+            "Maximum memory": parseInt(sliceMathches[4]),
+          },
+          WorkMemory: parseInt(sliceMathches[5]),
+        })
+      } else if (extraMatches && !sliceMathches) {
         //const prefix = extraMatches[1]
 
         // Remove elements from elementsAtDepth for deeper levels
