@@ -57,9 +57,10 @@ export enum NodeProp {
   ACTUAL_LOOPS = "Actual Loops",
   STARTUP_COST = "Startup Cost",
   TOTAL_COST = "Total Cost",
-  DATA_SEGMENTS = "Data Segments",
-  TARGET_DATA_NODE = "Target Data Node",
-  SLICE_SEGMENTS = "Slice Segments",
+  DATA_SEGMENTS = "Data Segments", //6
+  TARGET_DATA_NODE = "Target Data Node", //1
+  SLICE_SEGMENTS = "Slice Segments", //slice1; segments: 6
+  SLICE = "Slice",
   PLANS = "Plans",
   RELATION_NAME = "Relation Name",
   SCHEMA = "Schema",
