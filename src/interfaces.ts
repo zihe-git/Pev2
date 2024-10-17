@@ -64,6 +64,8 @@ export interface ExecutorMemory {
 export interface IPlanStats {
   executionTime?: number
   planningTime?: number
+  memoryUsed?: number
+  optimizer?: string
   maxRows: number
   maxCost: number
   maxDuration: number

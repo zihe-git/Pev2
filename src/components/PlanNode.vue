@@ -38,6 +38,7 @@ const viewOptions = inject(ViewOptionsKey) as ViewOptions
 interface Props {
   node: Node
 }
+
 const props = defineProps<Props>()
 
 const showDetails = ref<boolean>(false)
@@ -68,6 +69,7 @@ function updateSize(node: Node) {
     updateNodeSize?.(node, [rect.width, rect.height])
   }
 }
+
 provide("updateSize", updateSize)
 
 watch(showDetails, () => {
@@ -154,6 +156,7 @@ function centerCte() {
               </span>
               {{ nodeName }}
             </h4>
+
             <div class="text-nowrap">
               <node-badges :node="node" />
               <a
@@ -165,6 +168,14 @@ function centerCte() {
               </a>
             </div>
           </header>
+          <div v-if="/(Motion)$/.test(node[NodeProp.NODE_TYPE])">
+            <br />
+            {{ node[NodeProp.SLICE] }}
+            <br />
+            {{ "The Slowest: " + node[NodeProp.ACTUAL_TOTAL_TIME] }}
+            <br />
+          </div>
+          <hr />
           <div class="text-start font-monospace">
             <div
               v-if="
@@ -267,6 +278,7 @@ function centerCte() {
                 aria-valuemax="100"
               ></div>
             </div>
+
             <span class="node-bar-label">
               <span class="text-secondary"
                 >{{ viewOptions.highlightType }}:</span
@@ -275,6 +287,7 @@ function centerCte() {
             </span>
           </div>
         </div>
+
         <plan-node-detail :node="node" v-if="showDetails"></plan-node-detail>
       </div>
     </div>

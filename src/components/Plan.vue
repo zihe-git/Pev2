@@ -52,6 +52,7 @@ interface Props {
   planSource: string
   planQuery: string
 }
+
 const props = defineProps<Props>()
 
 const version = __APP_VERSION__ // eslint-disable-line no-undef
@@ -86,7 +87,7 @@ const edgeWeight = computed(() => {
   return d3
     .scaleLinear()
     .domain([0, planStats.maxRows])
-    .range([1, padding / 1.5])
+    .range([1, padding / 5])
 })
 const minScale = 0.2
 const zoomListener = d3
@@ -120,10 +121,14 @@ onBeforeMount(() => {
   if (savedOptions) {
     _.assignIn(viewOptions, JSON.parse(savedOptions))
   }
+  console.error("props.planSource")
+  console.log(props.planSource)
   let planJson: IPlanContent
   try {
     // 入口
     planJson = planService.fromSource(props.planSource) as IPlanContent
+    console.error("planJson")
+    console.log(planJson)
     parsed.value = true
     setActiveTab("plan")
   } catch (e) {
@@ -139,6 +144,9 @@ onBeforeMount(() => {
     (content["Total Runtime"] as number) ||
     NaN
   planStats.planningTime = (content["Planning Time"] as number) || NaN
+  planStats.memoryUsed = (content["Memory used"] as number) || NaN
+  planStats.optimizer = (content["Optimizer"] as string) || ""
+
   planStats.maxRows = content.maxRows || NaN
   planStats.maxCost = content.maxCost || NaN
   planStats.maxDuration = content.maxDuration || NaN
@@ -150,7 +158,8 @@ onBeforeMount(() => {
     (content.JIT && content.JIT.Timing && content.JIT.Timing.Total) || NaN
   planStats.settings = content.Settings as Settings
   plan.value.planStats = planStats
-
+  console.error("plan.value")
+  console.log(plan.value)
   nextTick(() => {
     onHashChange()
   })
@@ -331,6 +340,7 @@ function selectNode(nodeId: number, center: boolean): void {
     centerNode(nodeId)
   }
 }
+
 provide(SelectNodeKey, selectNode)
 provide(ViewOptionsKey, viewOptions)
 provide(PlanKey, plan)
@@ -646,6 +656,20 @@ function updateNodeSize(node: Node, size: [number, number]) {
                         stroke-linecap="square"
                         fill="none"
                       />
+
+                      <text
+                        v-for="(item, index) in layoutRootNode?.descendants()"
+                        :key="`text${index}`"
+                        :x="item.x - item.xSize / 2 + item.xSize / 2 + 20"
+                        :y="item.y + item.ySize - 30"
+                        font-size="12"
+                        fill="black"
+                        text-anchor="middle"
+                        dominant-baseline="central"
+                      >
+                        {{ item.data[NodeProp.DATA_SEGMENTS] }}
+                      </text>
+
                       <foreignObject
                         v-for="(item, index) in layoutRootNode?.descendants()"
                         :key="index"
@@ -723,7 +747,7 @@ function updateNodeSize(node: Node, size: [number, number]) {
       >
         <div class="overflow-hidden d-flex w-100 h-100 flex-column">
           <plan-stats></plan-stats>
-          <grid class="flex-grow-1 overflow-auto plan-grid"> </grid>
+          <grid class="flex-grow-1 overflow-auto plan-grid"></grid>
         </div>
       </div>
       <div
@@ -771,6 +795,7 @@ function updateNodeSize(node: Node, size: [number, number]) {
 
 path {
   stroke-linecap: butt;
+
   &.never-executed {
     stroke-dasharray: 0.5em;
     stroke-opacity: 0.5;
