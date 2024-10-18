@@ -60,6 +60,7 @@ export enum NodeProp {
   DATA_SEGMENTS = "Data Segments", //6
   TARGET_DATA_NODE = "Target Data Node", //1
   SLICE_SEGMENTS = "Slice Segments", //slice1; segments: 6
+  DYNAMIC_SCAN_ID = "Dynamic scan id",
   SLICE = "Slice",
   PLANS = "Plans",
   RELATION_NAME = "Relation Name",

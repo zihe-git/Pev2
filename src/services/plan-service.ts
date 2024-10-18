@@ -558,6 +558,8 @@ export class PlanService {
        * Groups
        * 1: prefix
        * 2: type
+       * dynamic scan
+       * dynamic scan id
        * 3: estimated_startup_cost
        * 4: estimated_total_cost
        * 5: estimated_rows
@@ -581,6 +583,8 @@ export class PlanService {
       const nodeRegex = new RegExp(
         prefixRegex +
           typeRegex +
+          "\\s*" +
+          "(\\(dynamic scan id:\\s*(\\d+)\\))?" +
           "\\s*" +
           nonCapturingGroupOpen +
           (nonCapturingGroupOpen +
@@ -733,50 +737,53 @@ export class PlanService {
         return
       } else if (nodeMatches && !cteMatches && !subMatches) {
         //const prefix = nodeMatches[1]
-        const neverExecuted = nodeMatches[13]
+        const neverExecuted = nodeMatches[15]
         const newNode: Node = new Node(nodeMatches[2])
+        if (nodeMatches[4]) {
+          newNode[NodeProp.DYNAMIC_SCAN_ID] = parseInt(nodeMatches[4])
+        }
         if (
-          (nodeMatches[3] && nodeMatches[4]) ||
-          (nodeMatches[14] && nodeMatches[15])
+          (nodeMatches[5] && nodeMatches[6]) ||
+          (nodeMatches[16] && nodeMatches[17])
         ) {
           newNode[NodeProp.STARTUP_COST] = parseFloat(
-            nodeMatches[3] || nodeMatches[14]
+            nodeMatches[5] || nodeMatches[16]
           )
           newNode[NodeProp.TOTAL_COST] = parseFloat(
-            nodeMatches[4] || nodeMatches[15]
+            nodeMatches[6] || nodeMatches[17]
           )
           newNode[NodeProp.PLAN_ROWS] = parseInt(
-            nodeMatches[5] || nodeMatches[16],
+            nodeMatches[7] || nodeMatches[18],
             0
           )
           newNode[NodeProp.PLAN_WIDTH] = parseInt(
-            nodeMatches[6] || nodeMatches[17],
+            nodeMatches[8] || nodeMatches[19],
             0
           )
         }
         if (
-          (nodeMatches[7] && nodeMatches[8]) ||
-          (nodeMatches[18] && nodeMatches[19])
+          (nodeMatches[9] && nodeMatches[10]) ||
+          (nodeMatches[20] && nodeMatches[21])
         ) {
           newNode[NodeProp.ACTUAL_STARTUP_TIME] = parseFloat(
-            nodeMatches[7] || nodeMatches[18]
+            nodeMatches[9] || nodeMatches[20]
           )
           newNode[NodeProp.ACTUAL_TOTAL_TIME] = parseFloat(
-            nodeMatches[8] || nodeMatches[19]
+            nodeMatches[10] || nodeMatches[21]
           )
         }
 
         if (
-          (nodeMatches[9] && nodeMatches[10]) ||
           (nodeMatches[11] && nodeMatches[12]) ||
-          (nodeMatches[20] && nodeMatches[21])
+          (nodeMatches[13] && nodeMatches[14]) ||
+          (nodeMatches[22] && nodeMatches[23])
         ) {
           newNode[NodeProp.ACTUAL_ROWS] = parseInt(
-            nodeMatches[9] || nodeMatches[11] || nodeMatches[20],
+            nodeMatches[11] || nodeMatches[13] || nodeMatches[22],
             0
           )
           newNode[NodeProp.ACTUAL_LOOPS] = parseInt(
-            nodeMatches[10] || nodeMatches[12] || nodeMatches[21],
+            nodeMatches[12] || nodeMatches[14] || nodeMatches[23],
             0
           )
         }
@@ -1077,8 +1084,12 @@ export class PlanService {
         // remove the " ms" unit in case of time
         let value: string | number = info[1].replace(/(\s*ms)$/, "")
         // try to convert to number
-        if (parseFloat(value)) {
-          value = parseFloat(value)
+        if (info[0] == "Partitions selected") {
+          value = info[1]
+        } else {
+          if (parseFloat(value)) {
+            value = parseFloat(value)
+          }
         }
 
         let property = info[0]

@@ -121,14 +121,10 @@ onBeforeMount(() => {
   if (savedOptions) {
     _.assignIn(viewOptions, JSON.parse(savedOptions))
   }
-  console.error("props.planSource")
-  console.log(props.planSource)
   let planJson: IPlanContent
   try {
     // 入口
     planJson = planService.fromSource(props.planSource) as IPlanContent
-    console.error("planJson")
-    console.log(planJson)
     parsed.value = true
     setActiveTab("plan")
   } catch (e) {
