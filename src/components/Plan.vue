@@ -65,6 +65,27 @@ const plan = ref<IPlan>()
 const planEl = ref()
 let planStats = reactive<IPlanStats>({} as IPlanStats)
 const rootNode = computed(() => plan.value && plan.value.content.Plan)
+// 计算属性 hasDataSegments
+// 计算属性 hasValidDataSegments
+const hasDataSegments = computed(() => {
+  // 检查 rootNode 和 rootNode.Plans 是否存在
+  if (!rootNode.value || !rootNode.value.Plans) {
+    return false
+  }
+
+  const plans = rootNode.value.Plans
+
+  // 检查每个 Plans[i].DATA_SEGMENTS 是否存在
+  for (let i = 0; i < plans.length; i++) {
+    console.log(plans[i]["Data Segments"])
+    if (plans[i]["Data Segments"] !== undefined) {
+      return true // 只要有任何一个 DATA_SEGMENTS 存在，就返回 true
+    }
+  }
+
+  return false // 如果所有 DATA_SEGMENTS 都不存在，则返回 false
+})
+
 const selectedNodeId = ref<number>(NaN)
 const selectedNode = ref<Node | undefined>(undefined)
 const highlightedNodeId = ref<number>(NaN)
@@ -656,19 +677,33 @@ function updateNodeSize(node: Node, size: [number, number]) {
                         stroke-linecap="square"
                         fill="none"
                       />
+                      <g v-if="hasDataSegments">
+                        <text
+                          v-for="(item, index) in layoutRootNode?.descendants()"
+                          :key="`text${index}`"
+                          :x="item.x - item.xSize / 2 + item.xSize / 2 + 20"
+                          :y="item.y + item.ySize - 35"
+                          font-size="12"
+                          fill="black"
+                          text-anchor="middle"
+                          dominant-baseline="central"
+                        >
+                          {{ item.data[NodeProp.DATA_SEGMENTS] }}
+                        </text>
 
-                      <text
-                        v-for="(item, index) in layoutRootNode?.descendants()"
-                        :key="`text${index}`"
-                        :x="item.x - item.xSize / 2 + item.xSize / 2 + 20"
-                        :y="item.y + item.ySize - 30"
-                        font-size="12"
-                        fill="black"
-                        text-anchor="middle"
-                        dominant-baseline="central"
-                      >
-                        {{ item.data[NodeProp.DATA_SEGMENTS] }}
-                      </text>
+                        <text
+                          v-for="(item, index) in layoutRootNode?.descendants()"
+                          :key="`text${index}`"
+                          :x="item.x - item.xSize / 2 + item.xSize / 2 + 20"
+                          :y="item.y - 10"
+                          font-size="12"
+                          fill="black"
+                          text-anchor="middle"
+                          dominant-baseline="central"
+                        >
+                          {{ item.data[NodeProp.TARGET_DATA_NODE] }}
+                        </text>
+                      </g>
 
                       <foreignObject
                         v-for="(item, index) in layoutRootNode?.descendants()"
