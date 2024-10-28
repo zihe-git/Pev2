@@ -553,38 +553,49 @@ export class PlanService {
 
       const emptyLineMatches = new RegExp(emptyLineRegex).exec(line)
       const headerMatches = new RegExp(headerRegex).exec(line)
+      // dynamic scan node
+      const dynamic = "(\\(dynamic scan id:\\s*(\\d+)\\))?"
+      // Gather Motion、Broadcast Motion and Redistribute Motion
+      const motion =
+        "(?:(\\d+)+:(\\d+)+\\s+\\((slice\\d+);\\s*segments:\\s*(\\d+)+\\))?"
 
       /*
        * Groups
        * 1: prefix
        * 2: type
-       * dynamic scan
-       * dynamic scan id
-       * 3: estimated_startup_cost
-       * 4: estimated_total_cost
-       * 5: estimated_rows
-       * 6: estimated_row_width
-       * 7: actual_time_first
-       * 8: actual_time_last
-       * 9: actual_rows
-       * 10: actual_loops
-       * 11: actual_rows_
-       * 12: actual_loops_
-       * 13: never_executed
-       * 14: estimated_startup_cost
-       * 15: estimated_total_cost
-       * 16: estimated_rows
-       * 17: estimated_row_width
-       * 18: actual_time_first
-       * 19: actual_time_last
-       * 20: actual_rows
-       * 21: actual_loops
+       * 3: dynamic_scan
+       * 4: dynamic_scan_id
+       * 5: data_slice_count
+       * 6: node_count
+       * 7: slice_id
+       * 8: segments_count
+       * 9: estimated_startup_cost
+       * 10: estimated_total_cost
+       * 11: estimated_rows
+       * 12: estimated_row_width
+       * 13: actual_time_first
+       * 14: actual_time_last
+       * 15: actual_rows
+       * 16: actual_loops
+       * 17: actual_rows_
+       * 18: actual_loops_
+       * 19: never_executed
+       * 20: estimated_startup_cost
+       * 21: estimated_total_cost
+       * 22: estimated_rows
+       * 23: estimated_row_width
+       * 24: actual_time_first
+       * 25: actual_time_last
+       * 26: actual_rows
+       * 27: actual_loops
        */
       const nodeRegex = new RegExp(
         prefixRegex +
           typeRegex +
           "\\s*" +
-          "(\\(dynamic scan id:\\s*(\\d+)\\))?" +
+          dynamic +
+          "\\s*" +
+          motion +
           "\\s*" +
           nonCapturingGroupOpen +
           (nonCapturingGroupOpen +
@@ -609,69 +620,6 @@ export class PlanService {
         "gm"
       )
       const nodeMatches = nodeRegex.exec(line)
-
-      // Match Gather Motion and Redistribute Motion node info
-      /*
-       * Groups
-       * 1: prefix
-       * 3: type(Gather/Redistribute motion)
-       * 4: data_segments
-       * 5: target_data_node
-       * 6: slice_segments
-       * 7: estimated_startup_cost
-       * 8: estimated_total_cost
-       * 9: estimated_rows
-       * 10: estimated_row_width
-       * 11: actual_time_first
-       * 12: actual_time_last
-       * 13: actual_rows
-       * 14: actual_loops
-       * 15: actual_rows_
-       * 16: actual_loops_
-       * 17: never_executed
-       * 18: data_segments
-       * 19: target_data_node
-       * 20: slice_segments
-       * 21: estimated_startup_cost
-       * 22: estimated_total_cost
-       * 23: estimated_rows
-       * 24: estimated_row_width
-       * 25: actual_time_first
-       * 26: actual_time_last
-       * 27: actual_rows
-       * 28: actual_loops
-       */
-      const gatherNodeRegex = new RegExp(
-        prefixRegex +
-          typeRegex +
-          "([^\\r\\n\\t\\f\\v\\:\\(]*?)\\s*" +
-          "(\\d+):(\\d+)" +
-          "\\s+" +
-          "\\(([^\\)]+)\\)" +
-          " \\s+" +
-          nonCapturingGroupOpen +
-          (nonCapturingGroupOpen +
-            estimationRegex +
-            "\\s+" +
-            openParenthesisRegex +
-            actualRegex +
-            closeParenthesisRegex +
-            nonCapturingGroupClose) +
-          "|" +
-          nonCapturingGroupOpen +
-          estimationRegex +
-          nonCapturingGroupClose +
-          "|" +
-          nonCapturingGroupOpen +
-          openParenthesisRegex +
-          actualRegex +
-          closeParenthesisRegex +
-          nonCapturingGroupClose +
-          nonCapturingGroupClose +
-          "\\s*$",
-        "gm"
-      )
-      const gatherNodeMatches = gatherNodeRegex.exec(line)
 
       // tslint:disable-next-line:max-line-length
       const subRegex =
@@ -737,135 +685,68 @@ export class PlanService {
         return
       } else if (nodeMatches && !cteMatches && !subMatches) {
         //const prefix = nodeMatches[1]
-        const neverExecuted = nodeMatches[15]
+        const neverExecuted = nodeMatches[19]
         const newNode: Node = new Node(nodeMatches[2])
         if (nodeMatches[4]) {
           newNode[NodeProp.DYNAMIC_SCAN_ID] = parseInt(nodeMatches[4])
         }
         if (
-          (nodeMatches[5] && nodeMatches[6]) ||
-          (nodeMatches[16] && nodeMatches[17])
+          nodeMatches[5] &&
+          nodeMatches[6] &&
+          nodeMatches[7] &&
+          nodeMatches[8]
         ) {
-          newNode[NodeProp.STARTUP_COST] = parseFloat(
-            nodeMatches[5] || nodeMatches[16]
-          )
-          newNode[NodeProp.TOTAL_COST] = parseFloat(
-            nodeMatches[6] || nodeMatches[17]
-          )
-          newNode[NodeProp.PLAN_ROWS] = parseInt(
-            nodeMatches[7] || nodeMatches[18],
-            0
-          )
-          newNode[NodeProp.PLAN_WIDTH] = parseInt(
-            nodeMatches[8] || nodeMatches[19],
-            0
-          )
+          newNode[NodeProp.DATA_SLICE_COUNT] = parseInt(nodeMatches[5])
+          newNode[NodeProp.NODE_COUNT] = parseInt(nodeMatches[6])
+          newNode[NodeProp.SLICE_ID] = nodeMatches[7]
+          newNode[NodeProp.SEGMENTS_COUNT] = parseInt(nodeMatches[8])
         }
         if (
           (nodeMatches[9] && nodeMatches[10]) ||
           (nodeMatches[20] && nodeMatches[21])
         ) {
-          newNode[NodeProp.ACTUAL_STARTUP_TIME] = parseFloat(
+          newNode[NodeProp.STARTUP_COST] = parseFloat(
             nodeMatches[9] || nodeMatches[20]
           )
-          newNode[NodeProp.ACTUAL_TOTAL_TIME] = parseFloat(
+          newNode[NodeProp.TOTAL_COST] = parseFloat(
             nodeMatches[10] || nodeMatches[21]
+          )
+          newNode[NodeProp.PLAN_ROWS] = parseInt(
+            nodeMatches[11] || nodeMatches[22],
+            0
+          )
+          newNode[NodeProp.PLAN_WIDTH] = parseInt(
+            nodeMatches[12] || nodeMatches[23],
+            0
+          )
+        }
+        if (
+          (nodeMatches[13] && nodeMatches[14]) ||
+          (nodeMatches[24] && nodeMatches[25])
+        ) {
+          newNode[NodeProp.ACTUAL_STARTUP_TIME] = parseFloat(
+            nodeMatches[13] || nodeMatches[24]
+          )
+          newNode[NodeProp.ACTUAL_TOTAL_TIME] = parseFloat(
+            nodeMatches[14] || nodeMatches[25]
           )
         }
 
         if (
-          (nodeMatches[11] && nodeMatches[12]) ||
-          (nodeMatches[13] && nodeMatches[14]) ||
-          (nodeMatches[22] && nodeMatches[23])
+          (nodeMatches[15] && nodeMatches[16]) ||
+          (nodeMatches[17] && nodeMatches[18]) ||
+          (nodeMatches[26] && nodeMatches[27])
         ) {
           newNode[NodeProp.ACTUAL_ROWS] = parseInt(
-            nodeMatches[11] || nodeMatches[13] || nodeMatches[22],
+            nodeMatches[15] || nodeMatches[17] || nodeMatches[26],
             0
           )
           newNode[NodeProp.ACTUAL_LOOPS] = parseInt(
-            nodeMatches[12] || nodeMatches[14] || nodeMatches[23],
+            nodeMatches[16] || nodeMatches[18] || nodeMatches[27],
             0
           )
         }
 
-        if (neverExecuted) {
-          newNode[NodeProp.ACTUAL_LOOPS] = 0
-          newNode[NodeProp.ACTUAL_ROWS] = 0
-          newNode[NodeProp.ACTUAL_TOTAL_TIME] = 0
-        }
-        const element = {
-          node: newNode,
-          subelementType: "subnode",
-        }
-
-        if (0 === elementsAtDepth.length) {
-          elementsAtDepth.push([depth, element])
-          root.Plan = newNode
-          return
-        }
-
-        // Remove elements from elementsAtDepth for deeper levels
-        _.remove(elementsAtDepth, (e) => {
-          return e[0] >= depth
-        })
-
-        // ! is for non-null assertion
-        // Prevents the "Object is possibly 'undefined'" linting error
-        const previousElement = _.last(elementsAtDepth)?.[1] as NodeElement
-
-        if (!previousElement) {
-          return
-        }
-
-        elementsAtDepth.push([depth, element])
-
-        if (!previousElement.node[NodeProp.PLANS]) {
-          previousElement.node[NodeProp.PLANS] = []
-        }
-        if (previousElement.subelementType === "initplan") {
-          newNode[NodeProp.PARENT_RELATIONSHIP] = "InitPlan"
-          newNode[NodeProp.SUBPLAN_NAME] = previousElement.name as string
-        } else if (previousElement.subelementType === "subplan") {
-          newNode[NodeProp.PARENT_RELATIONSHIP] = "SubPlan"
-          newNode[NodeProp.SUBPLAN_NAME] = previousElement.name as string
-        }
-        previousElement.node.Plans?.push(newNode)
-      } else if (gatherNodeMatches && !cteMatches && !subMatches) {
-        //const prefix = nodeMatches[1]
-        const neverExecuted = gatherNodeMatches[17]
-        const sliceSegments = gatherNodeMatches[6]
-          .split(/\s*;\s*/)
-          .filter((x) => x)
-        const newNode: Node = new Node(gatherNodeMatches[3])
-        if (gatherNodeMatches[4] && gatherNodeMatches[5]) {
-          newNode[NodeProp.DATA_SEGMENTS] = parseFloat(gatherNodeMatches[4])
-          newNode[NodeProp.TARGET_DATA_NODE] = parseFloat(gatherNodeMatches[5])
-        }
-        if (gatherNodeMatches[6]) {
-          newNode[NodeProp.SLICE_SEGMENTS] = gatherNodeMatches[6]
-        }
-        if (gatherNodeMatches[7] && gatherNodeMatches[8]) {
-          newNode[NodeProp.STARTUP_COST] = parseFloat(gatherNodeMatches[7])
-          newNode[NodeProp.TOTAL_COST] = parseFloat(gatherNodeMatches[8])
-          newNode[NodeProp.PLAN_ROWS] = parseInt(gatherNodeMatches[9], 0)
-          newNode[NodeProp.PLAN_WIDTH] = parseInt(gatherNodeMatches[10], 0)
-        }
-        if (gatherNodeMatches[11] && gatherNodeMatches[12]) {
-          newNode[NodeProp.ACTUAL_STARTUP_TIME] = parseFloat(
-            gatherNodeMatches[11]
-          )
-          newNode[NodeProp.ACTUAL_TOTAL_TIME] = parseFloat(
-            gatherNodeMatches[12]
-          )
-        }
-
-        if (gatherNodeMatches[13] && gatherNodeMatches[14]) {
-          newNode[NodeProp.ACTUAL_ROWS] = parseInt(gatherNodeMatches[13], 0)
-          newNode[NodeProp.ACTUAL_LOOPS] = parseInt(gatherNodeMatches[14], 0)
-        }
-        if (sliceSegments[0]) {
-          newNode[NodeProp.SLICE] = sliceSegments[0]
-        }
         if (neverExecuted) {
           newNode[NodeProp.ACTUAL_LOOPS] = 0
           newNode[NodeProp.ACTUAL_ROWS] = 0

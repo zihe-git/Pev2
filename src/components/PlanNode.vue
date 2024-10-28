@@ -170,7 +170,7 @@ function centerCte() {
           </header>
           <div v-if="/(Motion)$/.test(node[NodeProp.NODE_TYPE])">
             <br />
-            {{ node[NodeProp.SLICE] }}
+            {{ node[NodeProp.SLICE_ID] }}
             <br />
             {{ "The Slowest: " + node[NodeProp.ACTUAL_TOTAL_TIME] }}
             <br />

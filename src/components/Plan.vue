@@ -123,7 +123,6 @@ onBeforeMount(() => {
   }
   let planJson: IPlanContent
   try {
-    // 入口
     planJson = planService.fromSource(props.planSource) as IPlanContent
     parsed.value = true
     setActiveTab("plan")
@@ -663,7 +662,7 @@ function updateNodeSize(node: Node, size: [number, number]) {
                         text-anchor="middle"
                         dominant-baseline="central"
                       >
-                        {{ item.data[NodeProp.DATA_SEGMENTS] }}
+                        {{ item.data[NodeProp.DATA_SLICE_COUNT] }}
                       </text>
 
                       <foreignObject
