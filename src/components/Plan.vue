@@ -65,20 +65,17 @@ const plan = ref<IPlan>()
 const planEl = ref()
 let planStats = reactive<IPlanStats>({} as IPlanStats)
 const rootNode = computed(() => plan.value && plan.value.content.Plan)
-
+// Determine if there is a Data Segments attribute
 const hasDataSegments = computed(() => {
   if (!rootNode.value || !rootNode.value.Plans) {
     return false
   }
-
   const plans = rootNode.value.Plans
-
   for (let i = 0; i < plans.length; i++) {
     if (plans[i]["Data Segments"] !== undefined) {
       return true
     }
   }
-
   return false
 })
 
@@ -98,6 +95,11 @@ const planService = new PlanService()
 
 // Vertical padding between 2 nodes in the tree layout
 const padding = 40
+// Parallel node digital offset
+const numPositionX = 20
+const numPositionY1 = 10
+const numPositionY2 = 35
+
 const transform = ref("")
 const scale = ref(1)
 const edgeWeight = computed(() => {
@@ -671,27 +673,26 @@ function updateNodeSize(node: Node, size: [number, number]) {
                         <text
                           v-for="(item, index) in layoutRootNode?.descendants()"
                           :key="`text${index}`"
-                          :x="item.x - item.xSize / 2 + item.xSize / 2 + 20"
-                          :y="item.y + item.ySize - 35"
-                          font-size="12"
-                          fill="black"
-                          text-anchor="middle"
-                          dominant-baseline="central"
-                        >
-                          {{ item.data[NodeProp.DATA_SEGMENTS] }}
-                        </text>
-
-                        <text
-                          v-for="(item, index) in layoutRootNode?.descendants()"
-                          :key="`text${index}`"
-                          :x="item.x - item.xSize / 2 + item.xSize / 2 + 20"
-                          :y="item.y - 10"
+                          :x="item.x + numPositionX"
+                          :y="item.y - numPositionY1"
                           font-size="12"
                           fill="black"
                           text-anchor="middle"
                           dominant-baseline="central"
                         >
                           {{ item.data[NodeProp.TARGET_DATA_NODE] }}
+                        </text>
+                        <text
+                          v-for="(item, index) in layoutRootNode?.descendants()"
+                          :key="`text${index}`"
+                          :x="item.x + numPositionX"
+                          :y="item.y + item.ySize - numPositionY2"
+                          font-size="12"
+                          fill="black"
+                          text-anchor="middle"
+                          dominant-baseline="central"
+                        >
+                          {{ item.data[NodeProp.DATA_SEGMENTS] }}
                         </text>
                       </g>
 

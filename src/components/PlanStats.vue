@@ -137,14 +137,7 @@ function averageIO(node: Node) {
     <div class="d-inline-block border-start px-2">
       Memory used:
       <template v-if="!plan.planStats.memoryUsed">
-        <span class="text-secondary">
-          N/A
-          <FontAwesomeIcon
-            :icon="faInfoCircle"
-            class="cursor-help"
-            v-tippy="getHelpMessage('missing planning time')"
-          ></FontAwesomeIcon>
-        </span>
+        <span class="text-secondary"> N/A </span>
       </template>
       <template v-else>
         <span class="stat-value">
