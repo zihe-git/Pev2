@@ -183,7 +183,7 @@ function centerCte() {
               :icon="faPizzaSlice"
               class="text-secondary"
             ></FontAwesomeIcon>
-            {{ node[NodeProp.SLICE] }}
+            {{ node[NodeProp.SLICE_ID] }}
             <br />
             <FontAwesomeIcon
               fixed-width

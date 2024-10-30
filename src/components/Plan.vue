@@ -75,7 +75,7 @@ const hasDataSegments = computed(() => {
   }
   const plans = rootNode.value.Plans
   for (let i = 0; i < plans.length; i++) {
-    if (plans[i]["Data Segments"] !== undefined) {
+    if (plans[i]["Data Slice Count"] !== undefined) {
       return true
     }
   }
@@ -695,7 +695,7 @@ function updateNodeSize(node: Node, size: [number, number]) {
                           text-anchor="middle"
                           dominant-baseline="central"
                         >
-                          {{ item.data[NodeProp.TARGET_DATA_NODE] }}
+                          {{ item.data[NodeProp.NODE_COUNT] }}
                         </text>
                         <text
                           v-for="(item, index) in layoutRootNode?.descendants()"
@@ -707,7 +707,7 @@ function updateNodeSize(node: Node, size: [number, number]) {
                           text-anchor="middle"
                           dominant-baseline="central"
                         >
-                          {{ item.data[NodeProp.DATA_SEGMENTS] }}
+                          {{ item.data[NodeProp.DATA_SLICE_COUNT] }}
                         </text>
                       </g>
 
