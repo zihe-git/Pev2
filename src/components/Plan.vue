@@ -65,25 +65,21 @@ const plan = ref<IPlan>()
 const planEl = ref()
 let planStats = reactive<IPlanStats>({} as IPlanStats)
 const rootNode = computed(() => plan.value && plan.value.content.Plan)
-// 计算属性 hasDataSegments
-// 计算属性 hasValidDataSegments
+
 const hasDataSegments = computed(() => {
-  // 检查 rootNode 和 rootNode.Plans 是否存在
   if (!rootNode.value || !rootNode.value.Plans) {
     return false
   }
 
   const plans = rootNode.value.Plans
 
-  // 检查每个 Plans[i].DATA_SEGMENTS 是否存在
   for (let i = 0; i < plans.length; i++) {
-    console.log(plans[i]["Data Segments"])
     if (plans[i]["Data Segments"] !== undefined) {
-      return true // 只要有任何一个 DATA_SEGMENTS 存在，就返回 true
+      return true
     }
   }
 
-  return false // 如果所有 DATA_SEGMENTS 都不存在，则返回 false
+  return false
 })
 
 const selectedNodeId = ref<number>(NaN)
@@ -142,14 +138,10 @@ onBeforeMount(() => {
   if (savedOptions) {
     _.assignIn(viewOptions, JSON.parse(savedOptions))
   }
-  console.error("props.planSource")
-  console.log(props.planSource)
   let planJson: IPlanContent
   try {
     // 入口
     planJson = planService.fromSource(props.planSource) as IPlanContent
-    console.error("planJson")
-    console.log(planJson)
     parsed.value = true
     setActiveTab("plan")
   } catch (e) {
@@ -179,8 +171,6 @@ onBeforeMount(() => {
     (content.JIT && content.JIT.Timing && content.JIT.Timing.Total) || NaN
   planStats.settings = content.Settings as Settings
   plan.value.planStats = planStats
-  console.error("plan.value")
-  console.log(plan.value)
   nextTick(() => {
     onHashChange()
   })
