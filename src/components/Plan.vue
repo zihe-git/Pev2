@@ -48,6 +48,13 @@ import {
   type FlexHierarchyPointLink,
   type FlexHierarchyPointNode,
 } from "d3-flextree"
+import {
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+  faChevronUp,
+} from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
 
 interface Props {
   planSource: string
@@ -102,6 +109,7 @@ const padding = 40
 const numPositionX = 20
 const numPositionY1 = 10
 const numPositionY2 = 35
+const showSlice = ref<boolean>(true)
 
 const transform = ref("")
 const scale = ref(1)
@@ -643,10 +651,25 @@ function updateNodeSize(node: Node, size: [number, number]) {
                   </div>
 
                   <div
-                    class="position-absolute m-2 p-0 top-0 end-0 d-flex"
+                    class="position-absolute m-2 top-0 end-0 d-flex align-items-center"
                     v-if="plan"
                   >
-                    <div class="text-start plan-node">
+                    <span
+                      class="text-secondary"
+                      @click.prevent.stop="showSlice = !showSlice"
+                    >
+                      <FontAwesomeIcon
+                        fixed-width
+                        :icon="faChevronRight"
+                        v-if="showSlice"
+                      ></FontAwesomeIcon>
+                      <FontAwesomeIcon
+                        fixed-width
+                        :icon="faChevronLeft"
+                        v-else
+                      ></FontAwesomeIcon>
+                    </span>
+                    <div v-if="showSlice" class="text-start plan-node">
                       <div v-for="(item, index) in Slice" :key="index">
                         <SliceDetail :memory-details="item"></SliceDetail>
                       </div>
