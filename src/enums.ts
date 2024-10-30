@@ -148,7 +148,7 @@ export enum SliceProp {
 }
 
 export enum ExecutorMemoryEnum {
-  AVERAGE_MEMORY = "average memory",
+  AVERAGE_MEMORY = "Average memory",
   NUMBER_OF_WORKER_THREADS = "Number of worker threads",
   MAXIMUM_MEMORY = "Maximum memory",
 }

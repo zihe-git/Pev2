@@ -6,6 +6,8 @@ import {
   NodeProp,
   SortSpaceMemoryProp,
   WorkerProp,
+  SliceProp,
+  ExecutorMemoryEnum,
 } from "@/enums"
 import { splitBalanced } from "@/services/help-service"
 import type {
@@ -14,6 +16,7 @@ import type {
   IPlanContent,
   IPlanStats,
   JIT,
+  Slice,
   SortGroups,
 } from "@/interfaces"
 import { Node, Worker } from "@/interfaces"
@@ -678,7 +681,7 @@ export class PlanService {
        * 5: worke memory
        */
       const sliceRegex =
-        /\(slice(\d+)\)\s+(?:Executor\s+memory:\s*)?(?:(\d+)?K\s+bytes)?(?:\s+avg\s+x\s+(\d+)?\s+workers)?(?:,\s*(\d+)?K\s+bytes\s+max\s+\(seg\d+\))?(?:\.\s+Work_mem:\s*(\d+)?K\s+bytes\s+max\.)?/
+        /\(slice(\d+)\)\s+(?:Executor\s+memory:\s*)?(?:(\d+?K\s+bytes))?(?:\s+avg\s+x\s+(\d+)?\s+workers)?(?:,\s*(\d+?K\s+bytes)\s+max\s+\(seg\d+\))?(?:\.\s+Work_mem:\s*(\d+?K\s+bytes)\s+max\.)?/
       const sliceMathches = sliceRegex.exec(line)
 
       if (emptyLineMatches || headerMatches) {
@@ -885,15 +888,16 @@ export class PlanService {
       } else if (sliceMathches) {
         _.remove(elementsAtDepth, (e) => e[0] >= depth || depth == 1)
         root.Slice = root.Slice || []
-        root.Slice.push({
-          "Slice Num": sliceMathches[1],
+        const sliceDetail: Slice = {
+          [SliceProp.SLICE_NUM]: sliceMathches[1],
           ExecutorMemory: {
-            "average memory": parseInt(sliceMathches[2]),
-            "Number of worker threads": parseInt(sliceMathches[3]),
-            "Maximum memory": parseInt(sliceMathches[4]),
+            [ExecutorMemoryEnum.AVERAGE_MEMORY]: sliceMathches[2],
+            [ExecutorMemoryEnum.NUMBER_OF_WORKER_THREADS]: sliceMathches[3],
+            [ExecutorMemoryEnum.MAXIMUM_MEMORY]: sliceMathches[4],
           },
-          WorkMemory: parseInt(sliceMathches[5]),
-        })
+          WorkMemory: sliceMathches[5],
+        }
+        root.Slice.push(sliceDetail)
       } else if (extraMatches && !sliceMathches) {
         //const prefix = extraMatches[1]
 

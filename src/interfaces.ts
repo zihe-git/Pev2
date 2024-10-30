@@ -52,13 +52,13 @@ export interface ITrigger {
 export interface Slice {
   [SliceProp.SLICE_NUM]: string
   ExecutorMemory?: ExecutorMemory
-  WorkMemory?: number
+  WorkMemory?: string
 }
 
 export interface ExecutorMemory {
-  [ExecutorMemoryEnum.AVERAGE_MEMORY]?: number
-  [ExecutorMemoryEnum.NUMBER_OF_WORKER_THREADS]?: number
-  [ExecutorMemoryEnum.MAXIMUM_MEMORY]?: number
+  [ExecutorMemoryEnum.AVERAGE_MEMORY]?: string
+  [ExecutorMemoryEnum.NUMBER_OF_WORKER_THREADS]?: string
+  [ExecutorMemoryEnum.MAXIMUM_MEMORY]?: string
 }
 
 export interface IPlanStats {
@@ -222,15 +222,15 @@ export class Node {
   }
 }
 
-class SliceDetail implements Slice {
+export class SliceDetail implements Slice {
   [SliceProp.SLICE_NUM]: string
   ExecutorMemory?: ExecutorMemory
-  WorkMemory?: number
+  WorkMemory?: string
 
   constructor(
     sliceNum: string,
     executorMemory?: ExecutorMemory,
-    workMemory?: number
+    workMemory?: string
   ) {
     this[SliceProp.SLICE_NUM] = sliceNum
     this.ExecutorMemory = executorMemory

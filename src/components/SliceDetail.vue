@@ -43,10 +43,9 @@
           "
           class="text-secondary"
         >
-          average memory :
+          Average memory :
           {{ memoryDetails.ExecutorMemory[ExecutorMemoryEnum.AVERAGE_MEMORY] }}
         </span>
-        <span v-else class="text-secondary">average memory : N/A</span>
 
         <span
           v-if="
@@ -63,9 +62,6 @@
             ]
           }}
         </span>
-        <span v-else class="text-secondary"
-          >Number of worker threads : N/A</span
-        >
 
         <span
           v-if="
@@ -76,13 +72,11 @@
           Maximum memory :
           {{ memoryDetails.ExecutorMemory[ExecutorMemoryEnum.MAXIMUM_MEMORY] }}
         </span>
-        <span v-else class="text-secondary">Maximum memory : N/A</span>
       </div>
 
       <span v-if="memoryDetails.WorkMemory" class="text-secondary mt-3 px-3">
         WorkMemory : {{ memoryDetails.WorkMemory }}
       </span>
-      <span v-else class="text-secondary mt-3 px-3">WorkMemory : N/A</span>
     </div>
   </div>
 </template>
@@ -96,11 +90,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
 import { ExecutorMemoryEnum, SliceProp } from "@/enums"
-import type { Slice } from "@/interfaces" // 确保引入 Slice 接口
+import type { Slice, SliceDetail } from "@/interfaces"
 
-// 确保 Props 接口使用 Slice 类型
 interface Props {
-  memoryDetails: Slice
+  memoryDetails: SliceDetail
 }
 
 const props = defineProps<Props>()
