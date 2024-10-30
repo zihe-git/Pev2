@@ -646,7 +646,7 @@ function updateNodeSize(node: Node, size: [number, number]) {
                     class="position-absolute m-2 p-0 top-0 end-0 d-flex"
                     v-if="plan"
                   >
-                    <div class="text-start">
+                    <div class="text-start plan-node">
                       <div v-for="(item, index) in Slice" :key="index">
                         <SliceDetail :memory-details="item"></SliceDetail>
                       </div>
