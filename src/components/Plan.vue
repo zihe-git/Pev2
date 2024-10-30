@@ -33,6 +33,7 @@ import Diagram from "@/components/Diagram.vue"
 import Grid from "@/components/Grid.vue"
 import LogoImage from "@/components/LogoImage.vue"
 import PlanNode from "@/components/PlanNode.vue"
+import SliceDetail from "@/components/SliceDetail.vue"
 import PlanStats from "@/components/PlanStats.vue"
 import Stats from "@/components/Stats.vue"
 import { PlanService } from "@/services/plan-service"
@@ -65,6 +66,8 @@ const plan = ref<IPlan>()
 const planEl = ref()
 let planStats = reactive<IPlanStats>({} as IPlanStats)
 const rootNode = computed(() => plan.value && plan.value.content.Plan)
+const Slice = computed(() => plan.value && plan.value.content.Slice)
+
 // Determine if there is a Data Segments attribute
 const hasDataSegments = computed(() => {
   if (!rootNode.value || !rootNode.value.Plans) {
@@ -638,6 +641,18 @@ function updateNodeSize(node: Node, size: [number, number]) {
                       </button>
                     </div>
                   </div>
+
+                  <div
+                    class="position-absolute m-2 p-0 top-0 end-0 d-flex"
+                    v-if="plan"
+                  >
+                    <div class="text-start plan-node">
+                      <div v-for="(item, index) in Slice" :key="index">
+                        <SliceDetail :memory-details="item"></SliceDetail>
+                      </div>
+                    </div>
+                  </div>
+
                   <svg width="100%" height="100%">
                     <g :transform="transform">
                       <!-- Links -->

@@ -59,8 +59,7 @@ export function formatMemoryUsage(memoryInKB: number): string {
 }
 
 // Example usage:
-const memoryUsedKB = 262144
-console.log(formatMemoryUsage(memoryUsedKB)) // Output: "256.00 MB"
+// const memoryUsedKB = 262144
 export function cost(value: number): string {
   if (value === undefined) {
     return "N/A"

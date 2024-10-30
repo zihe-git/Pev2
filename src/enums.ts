@@ -140,7 +140,17 @@ export enum NodeProp {
 
   PEV_PLAN_TAG = "plan_",
 }
+export enum SliceProp {
+  SLICE_NUM = "Slice Num",
+  EXECUTOR_MEMORY = "ExecutorMemory",
+  WORK_MEMORY = "WorkMemory",
+}
 
+export enum ExecutorMemoryEnum {
+  AVERAGE_MEMORY = "average memory",
+  NUMBER_OF_WORKER_THREADS = "Number of worker threads",
+  MAXIMUM_MEMORY = "Maximum memory",
+}
 export enum PropType {
   blocks,
   boolean,

@@ -50,15 +50,15 @@ export interface ITrigger {
 }
 
 export interface Slice {
-  "Slice Num": string
+  [SliceProp.SLICE_NUM]: string
   ExecutorMemory?: ExecutorMemory
   WorkMemory?: number
 }
 
 export interface ExecutorMemory {
-  "average memory"?: number
-  "Number of worker threads"?: number
-  "Maximum memory"?: number
+  [ExecutorMemoryEnum.AVERAGE_MEMORY]?: number
+  [ExecutorMemoryEnum.NUMBER_OF_WORKER_THREADS]?: number
+  [ExecutorMemoryEnum.MAXIMUM_MEMORY]?: number
 }
 
 export interface IPlanStats {
@@ -81,7 +81,12 @@ export type IBlocksStats = {
   [key in BufferLocation]: number
 }
 
-import { EstimateDirection, NodeProp } from "@/enums"
+import {
+  EstimateDirection,
+  NodeProp,
+  ExecutorMemoryEnum,
+  SliceProp,
+} from "@/enums"
 
 // Class to create nodes when parsing text
 export class Node {
@@ -214,6 +219,22 @@ export class Node {
       }
       this[NodeProp.NODE_TYPE] += " Join"
     }
+  }
+}
+
+class SliceDetail implements Slice {
+  [SliceProp.SLICE_NUM]: string
+  ExecutorMemory?: ExecutorMemory
+  WorkMemory?: number
+
+  constructor(
+    sliceNum: string,
+    executorMemory?: ExecutorMemory,
+    workMemory?: number
+  ) {
+    this[SliceProp.SLICE_NUM] = sliceNum
+    this.ExecutorMemory = executorMemory
+    this.WorkMemory = workMemory
   }
 }
 
