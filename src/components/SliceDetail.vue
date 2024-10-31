@@ -1,7 +1,7 @@
 <template>
-  <div ref="outerEl" @mousedown.stop>
-    <div class="text-start execution-memory-node">
-      <header class="mt-0 d-flex">
+  <div ref="outerEl" @dblclick.stop>
+    <div class="execution-memory-node">
+      <header class="d-flex">
         <FontAwesomeIcon
           fixed-width
           :icon="faPizzaSlice"
@@ -11,9 +11,9 @@
           Slice : {{ memoryDetails[SliceProp.SLICE_NUM] }}
         </span>
       </header>
-      <header class="mb-2 d-flex justify-content-between">
+      <header class="d-flex justify-content-between">
         <h4
-          class="overflow-hidden btn btn-light text-start py-0 px-0 d-flex"
+          class="btn py-0 px-0 d-flex"
           @click.prevent.stop="showDetails = !showDetails"
         >
           <span class="text-secondary">
@@ -28,11 +28,10 @@
               v-else
             ></FontAwesomeIcon>
           </span>
-          <span> </span>
+          <span></span>
           ExecutorMemory
         </h4>
       </header>
-
       <div
         v-if="showDetails"
         class="d-flex flex-column justify-content-around px-3"

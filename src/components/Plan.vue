@@ -651,7 +651,7 @@ function updateNodeSize(node: Node, size: [number, number]) {
                   </div>
 
                   <div
-                    class="position-absolute m-2 top-0 end-0 d-flex align-items-center"
+                    class="position-absolute top-0 end-0 d-flex align-items-center"
                     v-if="plan"
                   >
                     <span
@@ -669,7 +669,7 @@ function updateNodeSize(node: Node, size: [number, number]) {
                         v-else
                       ></FontAwesomeIcon>
                     </span>
-                    <div v-if="showSlice" class="text-start plan-node">
+                    <div v-if="showSlice" class="plan-node">
                       <div v-for="(item, index) in Slice" :key="index">
                         <SliceDetail :memory-details="item"></SliceDetail>
                       </div>
