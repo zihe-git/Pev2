@@ -652,7 +652,7 @@ function updateNodeSize(node: Node, size: [number, number]) {
 
                   <div
                     class="position-absolute top-0 end-0 d-flex align-items-center"
-                    v-if="plan"
+                    v-if="Slice"
                   >
                     <span
                       class="text-secondary"
