@@ -38,17 +38,23 @@
       >
         <span
           v-if="
-            memoryDetails.ExecutorMemory?.[ExecutorMemoryEnum.AVERAGE_MEMORY]
+            memoryDetails[SliceProp.EXECUTOR_MEMORY]?.[
+              ExecutorMemoryEnum.AVERAGE_MEMORY
+            ]
           "
           class="text-secondary"
         >
           Average memory :
-          {{ memoryDetails.ExecutorMemory[ExecutorMemoryEnum.AVERAGE_MEMORY] }}
+          {{
+            memoryDetails[SliceProp.EXECUTOR_MEMORY]?.[
+              ExecutorMemoryEnum.AVERAGE_MEMORY
+            ]
+          }}
         </span>
 
         <span
           v-if="
-            memoryDetails.ExecutorMemory?.[
+            memoryDetails[SliceProp.EXECUTOR_MEMORY]?.[
               ExecutorMemoryEnum.NUMBER_OF_WORKER_THREADS
             ]
           "
@@ -56,7 +62,7 @@
         >
           Number of worker threads :
           {{
-            memoryDetails.ExecutorMemory[
+            memoryDetails[SliceProp.EXECUTOR_MEMORY]?.[
               ExecutorMemoryEnum.NUMBER_OF_WORKER_THREADS
             ]
           }}
@@ -64,17 +70,27 @@
 
         <span
           v-if="
-            memoryDetails.ExecutorMemory?.[ExecutorMemoryEnum.MAXIMUM_MEMORY]
+            memoryDetails[SliceProp.EXECUTOR_MEMORY]?.[
+              ExecutorMemoryEnum.MAXIMUM_MEMORY
+            ]
           "
           class="text-secondary"
         >
           Maximum memory :
-          {{ memoryDetails.ExecutorMemory[ExecutorMemoryEnum.MAXIMUM_MEMORY] }}
+
+          {{
+            memoryDetails[SliceProp.EXECUTOR_MEMORY]?.[
+              ExecutorMemoryEnum.MAXIMUM_MEMORY
+            ]
+          }}
         </span>
       </div>
 
-      <span v-if="memoryDetails.WorkMemory" class="text-secondary mt-3 px-3">
-        WorkMemory : {{ memoryDetails.WorkMemory }}
+      <span
+        v-if="memoryDetails[SliceProp.WORK_MEMORY]"
+        class="text-secondary mt-3 px-3"
+      >
+        WorkMemory : {{ memoryDetails[SliceProp.WORK_MEMORY] }}
       </span>
     </div>
   </div>
@@ -89,10 +105,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
 import { ExecutorMemoryEnum, SliceProp } from "@/enums"
-import type { Slice, SliceDetail } from "@/interfaces"
+import type { Slice } from "@/interfaces"
 
 interface Props {
-  memoryDetails: SliceDetail
+  memoryDetails: Slice
 }
 
 const props = defineProps<Props>()

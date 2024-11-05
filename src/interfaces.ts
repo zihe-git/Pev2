@@ -51,8 +51,8 @@ export interface ITrigger {
 
 export interface Slice {
   [SliceProp.SLICE_NUM]: string
-  ExecutorMemory?: ExecutorMemory
-  WorkMemory?: string
+  [SliceProp.EXECUTOR_MEMORY]?: ExecutorMemory
+  [SliceProp.WORK_MEMORY]?: string
 }
 
 export interface ExecutorMemory {
@@ -219,22 +219,6 @@ export class Node {
       }
       this[NodeProp.NODE_TYPE] += " Join"
     }
-  }
-}
-
-export class SliceDetail implements Slice {
-  [SliceProp.SLICE_NUM]: string
-  ExecutorMemory?: ExecutorMemory
-  WorkMemory?: string
-
-  constructor(
-    sliceNum: string,
-    executorMemory?: ExecutorMemory,
-    workMemory?: string
-  ) {
-    this[SliceProp.SLICE_NUM] = sliceNum
-    this.ExecutorMemory = executorMemory
-    this.WorkMemory = workMemory
   }
 }
 
